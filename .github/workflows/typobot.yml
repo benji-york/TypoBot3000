@@ -51,15 +51,24 @@ jobs:
         if: success()
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          PR_URL=$(gh pr list --head "${{ steps.claude.outputs.branch_name }}" --json url --jq '.[0].url')
+          BRANCH="${{ steps.claude.outputs.branch_name }}"
+          if [ -n "$BRANCH" ]; then
+            PR_URL=$(gh pr list --head "$BRANCH" --json url --jq '.[0].url')
+          fi
+          if [ -z "$PR_URL" ]; then
+            PR_URL=$(gh pr list --state open --limit 1 --json url --jq '.[0].url')
+          fi
+          MSG="${PR_URL:+PR ready: $PR_URL}"
+          MSG="${MSG:-Done, but I couldn't find the PR URL. Check the repo.}"
           curl -s -X POST https://slack.com/api/chat.postMessage \
             -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{
               \"channel\": \"${{ github.event.inputs.slack_channel }}\",
               \"thread_ts\": \"${{ github.event.inputs.slack_thread_ts }}\",
-              \"text\": \"PR ready: ${PR_URL}\"
+              \"text\": \"$MSG\"
             }"
 
       - name: Notify Slack on failure

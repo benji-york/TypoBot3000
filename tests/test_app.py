@@ -46,3 +46,29 @@ def test_handle_mention_replies_and_dispatches(monkeypatch):
         slack_channel="C999",
         slack_thread_ts="111.222",
     )
+
+
+def test_handle_mention_reports_dispatch_failure(monkeypatch):
+    monkeypatch.setenv("GITHUB_PAT", "ghp_fake")
+    monkeypatch.setenv("GITHUB_REPO_OWNER", "test-org")
+    monkeypatch.setenv("GITHUB_REPO_NAME", "client-apps")
+
+    import importlib
+    import app as app_module
+    importlib.reload(app_module)
+
+    event = {"text": "<@U12345> typo", "channel": "C999", "ts": "111.222"}
+    say = MagicMock()
+
+    with patch("app.trigger_workflow", side_effect=Exception("API error")):
+        app_module.handle_mention(event=event, say=say)
+
+    assert say.call_count == 2
+    say.assert_any_call(
+        text="On it -- I'll post the PR here when it's ready.",
+        thread_ts="111.222",
+    )
+    say.assert_any_call(
+        text="Failed to dispatch workflow: API error",
+        thread_ts="111.222",
+    )

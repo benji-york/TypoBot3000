@@ -30,14 +30,20 @@ def handle_mention(event, say):
 
     typo_description = strip_mention(raw_text)
 
-    trigger_workflow(
-        owner=GITHUB_REPO_OWNER,
-        repo=GITHUB_REPO_NAME,
-        token=GITHUB_PAT,
-        typo_description=typo_description,
-        slack_channel=channel,
-        slack_thread_ts=thread_ts,
-    )
+    try:
+        trigger_workflow(
+            owner=GITHUB_REPO_OWNER,
+            repo=GITHUB_REPO_NAME,
+            token=GITHUB_PAT,
+            typo_description=typo_description,
+            slack_channel=channel,
+            slack_thread_ts=thread_ts,
+        )
+    except Exception as e:
+        say(
+            text=f"Failed to dispatch workflow: {e}",
+            thread_ts=thread_ts,
+        )
 
 
 if __name__ == "__main__":

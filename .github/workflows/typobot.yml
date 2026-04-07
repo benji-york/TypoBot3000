@@ -37,6 +37,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
+          claude_args: "--allowedTools Edit,Write,Read,Bash,Glob,Grep"
           prompt: |
             A user reported the following typo:
 

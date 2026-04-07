@@ -13,6 +13,10 @@ GITHUB_REPO_OWNER = os.environ.get("GITHUB_REPO_OWNER", "")
 GITHUB_REPO_NAME = os.environ.get("GITHUB_REPO_NAME", "TypoBot3000")
 
 
+def typos_fixed() -> str:
+    return "Number of typos fixed: 0"
+
+
 def strip_mention(text: str) -> str:
     return re.sub(r"<@[A-Z0-9]+>\s*", "", text).strip()
 

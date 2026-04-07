@@ -6,4 +6,3 @@ A Slack bot that fixes typos autonomously. Mention it with a typo report, and it
 @TypoBot3000 in the readme it says "recieve" instead of "receive"
 ```
 
-Number of typos fixed: 0

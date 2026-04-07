@@ -1,0 +1,18 @@
+[project]
+name = "typobot3000"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "slack-bolt>=1.21.0",
+    "httpx>=0.28.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "respx>=0.22.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

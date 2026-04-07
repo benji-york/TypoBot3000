@@ -1,0 +1,48 @@
+from app import strip_mention
+from unittest.mock import MagicMock, patch
+
+
+def test_strip_mention_removes_bot_id():
+    assert strip_mention("<@U12345> on pricing page recieve") == "on pricing page recieve"
+
+
+def test_strip_mention_handles_extra_whitespace():
+    assert strip_mention("<@U12345>  fix the typo  ") == "fix the typo"
+
+
+def test_strip_mention_no_mention():
+    assert strip_mention("just some text") == "just some text"
+
+
+def test_handle_mention_replies_and_dispatches(monkeypatch):
+    monkeypatch.setenv("GITHUB_PAT", "ghp_fake")
+    monkeypatch.setenv("GITHUB_REPO_OWNER", "test-org")
+    monkeypatch.setenv("GITHUB_REPO_NAME", "client-apps")
+
+    # Re-import to pick up env vars
+    import importlib
+    import app as app_module
+    importlib.reload(app_module)
+
+    event = {
+        "text": "<@U12345> on pricing page recieve should be receive",
+        "channel": "C999",
+        "ts": "111.222",
+    }
+    say = MagicMock()
+
+    with patch("app.trigger_workflow") as mock_dispatch:
+        app_module.handle_mention(event=event, say=say)
+
+    say.assert_called_once_with(
+        text="On it -- I'll post the PR here when it's ready.",
+        thread_ts="111.222",
+    )
+    mock_dispatch.assert_called_once_with(
+        owner="test-org",
+        repo="client-apps",
+        token="ghp_fake",
+        typo_description="on pricing page recieve should be receive",
+        slack_channel="C999",
+        slack_thread_ts="111.222",
+    )

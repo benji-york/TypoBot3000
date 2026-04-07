@@ -10,7 +10,7 @@ app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
 
 GITHUB_PAT = os.environ.get("GITHUB_PAT", "")
 GITHUB_REPO_OWNER = os.environ.get("GITHUB_REPO_OWNER", "")
-GITHUB_REPO_NAME = os.environ.get("GITHUB_REPO_NAME", "client-apps")
+GITHUB_REPO_NAME = os.environ.get("GITHUB_REPO_NAME", "TypoBot3000")
 
 
 def strip_mention(text: str) -> str:

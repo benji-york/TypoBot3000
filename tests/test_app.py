@@ -17,7 +17,7 @@ def test_strip_mention_no_mention():
 def test_handle_mention_replies_and_dispatches(monkeypatch):
     monkeypatch.setenv("GITHUB_PAT", "ghp_fake")
     monkeypatch.setenv("GITHUB_REPO_OWNER", "test-org")
-    monkeypatch.setenv("GITHUB_REPO_NAME", "client-apps")
+    monkeypatch.setenv("GITHUB_REPO_NAME", "TypoBot3000")
 
     # Re-import to pick up env vars
     import importlib
@@ -40,7 +40,7 @@ def test_handle_mention_replies_and_dispatches(monkeypatch):
     )
     mock_dispatch.assert_called_once_with(
         owner="test-org",
-        repo="client-apps",
+        repo="TypoBot3000",
         token="ghp_fake",
         typo_description="on pricing page recieve should be receive",
         slack_channel="C999",
@@ -51,7 +51,7 @@ def test_handle_mention_replies_and_dispatches(monkeypatch):
 def test_handle_mention_reports_dispatch_failure(monkeypatch):
     monkeypatch.setenv("GITHUB_PAT", "ghp_fake")
     monkeypatch.setenv("GITHUB_REPO_OWNER", "test-org")
-    monkeypatch.setenv("GITHUB_REPO_NAME", "client-apps")
+    monkeypatch.setenv("GITHUB_REPO_NAME", "TypoBot3000")
 
     import importlib
     import app as app_module

@@ -1,0 +1,77 @@
+name: TypoBot3000
+
+on:
+  workflow_dispatch:
+    inputs:
+      typo_description:
+        description: "User's typo report from Slack"
+        required: true
+        type: string
+      slack_channel:
+        description: "Slack channel ID for reply"
+        required: true
+        type: string
+      slack_thread_ts:
+        description: "Slack thread timestamp for reply"
+        required: true
+        type: string
+
+jobs:
+  fix-typo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fix typo with Claude
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            A user reported the following typo:
+
+            ${{ github.event.inputs.typo_description }}
+
+            Your task:
+            1. Find the file containing the incorrect text described above.
+            2. Write a test that asserts the CORRECT text is present. Use pytest (the project's test framework). Place the test in the tests/ directory.
+            3. Run the test and confirm it FAILS (because the typo is still there).
+            4. Fix the typo in the source file.
+            5. Run the test again and confirm it PASSES.
+            6. Create a pull request with the title "fix: typo - [brief description]" and a body explaining what was fixed and that this was reported via TypoBot3000.
+
+      - name: Notify Slack on success
+        if: success()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: |
+          PR_URL=$(gh pr list --head "${{ steps.claude.outputs.branch_name }}" --json url --jq '.[0].url')
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"channel\": \"${{ github.event.inputs.slack_channel }}\",
+              \"thread_ts\": \"${{ github.event.inputs.slack_thread_ts }}\",
+              \"text\": \"PR ready: ${PR_URL}\"
+            }"
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: |
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"channel\": \"${{ github.event.inputs.slack_channel }}\",
+              \"thread_ts\": \"${{ github.event.inputs.slack_thread_ts }}\",
+              \"text\": \"I couldn't fix this one. Check the workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+            }"

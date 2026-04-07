@@ -1,5 +1,9 @@
-from app import strip_mention
+from app import strip_mention, typos_fixed
 from unittest.mock import MagicMock, patch
+
+
+def test_typos_fixed_returns_one():
+    assert typos_fixed() == "Number of typos fixed: 1"
 
 
 def test_strip_mention_removes_bot_id():

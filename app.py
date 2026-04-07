@@ -14,7 +14,7 @@ GITHUB_REPO_NAME = os.environ.get("GITHUB_REPO_NAME", "TypoBot3000")
 
 
 def typos_fixed() -> str:
-    return "Number of typos fixed: 0"
+    return "Number of typos fixed: 1"
 
 
 def strip_mention(text: str) -> str:
